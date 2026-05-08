@@ -1,4 +1,4 @@
-module kinis-go-common-packages
+module go-common-packages
 
 go 1.24
 
