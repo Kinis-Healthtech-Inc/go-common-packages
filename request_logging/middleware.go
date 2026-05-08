@@ -18,7 +18,7 @@ func New(cfg Config) fiber.Handler {
 		cfg.SkipPaths = []string{"/health"}
 	}
 	if cfg.Logger == nil {
-		cfg.Logger = zap.NewNop()
+		panic("Logger must be set on the cfg")
 	}
 
 	return func(c *fiber.Ctx) error {
@@ -79,11 +79,11 @@ func New(cfg Config) fiber.Handler {
 		// Log based on status code or error
 		switch {
 		case statusCode >= 500:
-			cfg.Logger.Error(cfg.ServiceName, fields...)
+			cfg.Logger.ReqLogError(cfg.ServiceName, fields...)
 		case statusCode >= 400:
-			cfg.Logger.Warn(cfg.ServiceName, fields...)
+			cfg.Logger.ReqLogWarn(cfg.ServiceName, fields...)
 		default:
-			cfg.Logger.Info(cfg.ServiceName, fields...)
+			cfg.Logger.ReqLogInfo(cfg.ServiceName, fields...)
 		}
 
 		return err
