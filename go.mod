@@ -1,4 +1,4 @@
-module go-common-packages
+module github.com/Kinis-Healthtech-Inc/go-common-packages
 
 go 1.24
 
