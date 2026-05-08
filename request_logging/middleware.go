@@ -44,6 +44,10 @@ func New(cfg Config) fiber.Handler {
 		err := c.Next()
 
 		statusCode := c.Response().StatusCode()
+		// If no route was matched, set 404 status
+		if c.Response().StatusCode() == fiber.StatusOK && c.Route() == nil {
+			statusCode = fiber.StatusNotFound
+		}
 		latency := time.Since(start)
 		var userID string
 		var organizationID string
