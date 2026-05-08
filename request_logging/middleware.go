@@ -1,4 +1,4 @@
-package logging
+package request_logging
 
 import (
 	"strings"

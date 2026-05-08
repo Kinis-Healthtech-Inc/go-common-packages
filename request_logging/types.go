@@ -1,4 +1,4 @@
-package logging
+package request_logging
 
 import (
 	"github.com/gofiber/fiber/v2"
@@ -15,7 +15,7 @@ type ContextAuthKey struct {
 type GetUserFunc func(c *fiber.Ctx) (*ContextAuthKey, error)
 
 type Logger interface {
-	Error(msg string, fields ...zap.Field)
-	Info(msg string, fields ...zap.Field)
-	Warn(msg string, fields ...zap.Field)
+	ReqLogError(msg string, fields ...zap.Field)
+	ReqLogInfo(msg string, fields ...zap.Field)
+	ReqLogWarn(msg string, fields ...zap.Field)
 }
