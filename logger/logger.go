@@ -59,11 +59,11 @@ func (l *Logger) LogBusinessInfo(clinicianID string, message string) {
 }
 
 // NewLogger creates a new structured logger based on configs
-func NewLogger(cfg *Config) (*Logger, error) {
+func NewLogger() (*Logger, error) {
 	var zapCfg zap.Config
 	zapCfg = zap.NewProductionConfig()
 	encoder := zapcore.NewJSONEncoder(zapCfg.EncoderConfig)
-	
+
 	// stdout (for ECS / CloudWatch)
 	stdout := zapcore.AddSync(os.Stderr)
 
