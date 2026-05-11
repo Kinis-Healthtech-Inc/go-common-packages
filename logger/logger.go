@@ -16,23 +16,26 @@ type Logger struct {
 
 // ReqLogInfo logs request information
 func (l *Logger) ReqLogInfo(msg string, fields ...zap.Field) {
+	fields = append(fields, zap.String(RequestAccessLogType, ""))
 	l.Desugar().Info(msg, fields...)
 }
 
 // ReqLogError logs request errors
 func (l *Logger) ReqLogError(msg string, fields ...zap.Field) {
+	fields = append(fields, zap.String(RequestAccessLogType, ""))
 	l.Desugar().Error(msg, fields...)
 }
 
 // ReqLogWarn logs request warnings
 func (l *Logger) ReqLogWarn(msg string, fields ...zap.Field) {
+	fields = append(fields, zap.String(RequestAccessLogType, ""))
 	l.Desugar().Warn(msg, fields...)
 }
 
 // LogError logs an error with context
 func (l *Logger) LogError(context string, userID string, message string) {
 	fields := []zap.Field{
-		zap.String("type", "user_action"),
+		zap.String("type", ApplicationLogType),
 		zap.String("context", context),
 		zap.String("user_id", userID),
 		zap.String("data", message),
@@ -43,12 +46,22 @@ func (l *Logger) LogError(context string, userID string, message string) {
 // LogInfo logs information with context
 func (l *Logger) LogInfo(context string, userID string, message string) {
 	fields := []zap.Field{
-		zap.String("type", "user_action"),
+		zap.String("type", ApplicationLogType),
 		zap.String("context", context),
 		zap.String("user_id", userID),
 		zap.String("data", message),
 	}
 	l.Desugar().Info("api_service", fields...)
+}
+
+func (l *Logger) LogWard(context string, userID string, message string) {
+	fields := []zap.Field{
+		zap.String("type", ApplicationLogType),
+		zap.String("context", context),
+		zap.String("user_id", userID),
+		zap.String("data", message),
+	}
+	l.Desugar().Warn("api_service", fields...)
 }
 
 // LogBusinessInfo logs clinician business actions
