@@ -16,19 +16,19 @@ type Logger struct {
 
 // ReqLogInfo logs request information
 func (l *Logger) ReqLogInfo(msg string, fields ...zap.Field) {
-	fields = append(fields, zap.String(RequestAccessLogType, ""))
+	fields = append(fields, zap.String("type", RequestAccessLogType))
 	l.Desugar().Info(msg, fields...)
 }
 
 // ReqLogError logs request errors
 func (l *Logger) ReqLogError(msg string, fields ...zap.Field) {
-	fields = append(fields, zap.String(RequestAccessLogType, ""))
+	fields = append(fields, zap.String("type", RequestAccessLogType))
 	l.Desugar().Error(msg, fields...)
 }
 
 // ReqLogWarn logs request warnings
 func (l *Logger) ReqLogWarn(msg string, fields ...zap.Field) {
-	fields = append(fields, zap.String(RequestAccessLogType, ""))
+	fields = append(fields, zap.String("type", RequestAccessLogType))
 	l.Desugar().Warn(msg, fields...)
 }
 
