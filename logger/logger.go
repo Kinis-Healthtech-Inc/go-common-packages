@@ -71,8 +71,7 @@ func (l *Logger) LogBusinessInfo(clinicianID string, message string) {
 	l.Infow(formattedMessage)
 }
 
-// NewLogger creates a new structured logger based on configs
-func NewLogger() (*Logger, error) {
+func NewLogger() *Logger {
 	var zapCfg zap.Config
 	zapCfg = zap.NewProductionConfig()
 	encoder := zapcore.NewJSONEncoder(zapCfg.EncoderConfig)
@@ -105,5 +104,5 @@ func NewLogger() (*Logger, error) {
 		zap.AddStacktrace(zap.WarnLevel),
 	)
 
-	return &Logger{SugaredLogger: logger.Sugar()}, nil
+	return &Logger{SugaredLogger: logger.Sugar()}
 }
