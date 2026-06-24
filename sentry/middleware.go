@@ -9,8 +9,11 @@ import (
 
 // Handler is a named type around fiber.Handler so the sentryfiber middleware
 // can be injected through fx by type without colliding with other unrelated
-// fiber.Handler providers in the DI graph.
 type Handler fiber.Handler
+
+func (h Handler) FiberHandler() fiber.Handler {
+	return fiber.Handler(h)
+}
 
 // NewSentryMiddleware returns the sentryfiber middleware that attaches a
 // per-request *sentry.Hub to the Fiber context and auto-captures transactions
