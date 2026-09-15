@@ -66,7 +66,8 @@ func Init(lc fx.Lifecycle) (Logger, error) {
 		AddSource: true,
 	}.NewSentryHandler(ctx)
 	multiHandler := slog.NewMultiHandler(sentryHandler, consoleHandler)
-	slogLogger := slog.New(multiHandler)
+	contextHandler := &ContextHandler{Handler: multiHandler}
+	slogLogger := slog.New(contextHandler)
 
 	lc.Append(fx.Hook{
 		OnStop: func(ctx context.Context) error {
