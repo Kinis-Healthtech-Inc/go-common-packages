@@ -39,6 +39,7 @@ type SentryConfig struct {
 	TracesSampleRate float64
 	EnableTracing    bool
 	MaxBreadcrumbs   int
+	ServiceName      string
 }
 
 func loadSentryConfig() *SentryConfig {
@@ -62,6 +63,7 @@ func loadSentryConfig() *SentryConfig {
 		TracesSampleRate: tracesSampleRate,
 		EnableTracing:    sentryEnableTraces,
 		MaxBreadcrumbs:   maxBreadcrumbs,
+		ServiceName:      os.Getenv("SENTRY_SERVICE_NAME"),
 	}
 }
 
