@@ -91,24 +91,24 @@ func (c *client) Logger() *slog.Logger {
 
 func (c *client) LogRequest(ctx *fiber.Ctx, fields RequestLogFields) {
 	msg := fmt.Sprintf("HTTP %s %s - %d", fields.Method, fields.Endpoint, fields.StatusCode)
-
-	attrs := []any{
-		slog.String("context", fields.Context),
-		slog.String("event", fields.Event),
-		slog.String("type", string(LogType(RequestLogType))),
-		slog.String("service_name", c.serviceName),
-		slog.String("timestamp", fields.Timestamp),
-		slog.String("endpoint", fields.Endpoint),
-		slog.String("method", fields.Method),
-		slog.Int("status_code", fields.StatusCode),
-		slog.String("request_id", fields.RequestID),
-		slog.String("url", fields.URL),
-		slog.String("client_ip", fields.ClientIP),
-		slog.String("user_agent", fields.UserAgent),
-		slog.String("user_id", fields.UserID),
-		slog.String("organization_id", fields.OrganizationID),
-		slog.Duration("latency", fields.Latency),
-	}
+	attrs := StructToAttrs(fields)
+	//attrs := []any{
+	//	slog.String("context", fields.Context),
+	//	slog.String("event", fields.Event),
+	//	slog.String("type", string(LogType(RequestLogType))),
+	//	slog.String("service_name", c.serviceName),
+	//	slog.String("timestamp", fields.Timestamp),
+	//	slog.String("endpoint", fields.Endpoint),
+	//	slog.String("method", fields.Method),
+	//	slog.Int("status_code", fields.StatusCode),
+	//	slog.String("request_id", fields.RequestID),
+	//	slog.String("url", fields.URL),
+	//	slog.String("client_ip", fields.ClientIP),
+	//	slog.String("user_agent", fields.UserAgent),
+	//	slog.String("user_id", fields.UserID),
+	//	slog.String("organization_id", fields.OrganizationID),
+	//	slog.Duration("latency", fields.Latency),
+	//}
 
 	if fields.ErrorMessage != "" {
 		attrs = append(attrs, slog.String("error_message", fields.ErrorMessage))
@@ -119,8 +119,11 @@ func (c *client) LogRequest(ctx *fiber.Ctx, fields RequestLogFields) {
 	c.logger.InfoContext(ctx.Context(), msg, attrs...)
 }
 func (c *client) LogErrorDeprecated(ctx context.Context, errorContext string, errorMessage string) {
-	c.logger.With(LogFields{Context: errorContext}).ErrorContext(ctx, errorMessage)
+	c.logger.
+		With(slog.String("context", errorContext)).
+		With(slog.String("log_type", string(LogType(ApplicationLogType)))).
+		ErrorContext(ctx, errorMessage)
 }
 func (c *client) LogInfoDeprecated(ctx context.Context, infoContext string, message string) {
-	c.logger.With(LogFields{Context: infoContext}).InfoContext(ctx, message)
+	c.logger.With(slog.String("context", infoContext)).With(slog.String("log_type", string(LogType(ApplicationLogType)))).InfoContext(ctx, message)
 }

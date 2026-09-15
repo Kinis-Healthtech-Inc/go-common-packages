@@ -1,9 +1,12 @@
 package logger
 
 import (
+	"log/slog"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
+	"time"
 
 	sentrygo "github.com/getsentry/sentry-go"
 )
@@ -99,4 +102,75 @@ func beforeSend(event *sentrygo.Event, _ *sentrygo.EventHint) *sentrygo.Event {
 	}
 
 	return event
+}
+
+// StructToAttrs converts any struct (including embedded fields and json tags) into []any for slog
+func StructToAttrs(obj any) []any {
+	val := reflect.ValueOf(obj)
+	if val.Kind() == reflect.Ptr {
+		if val.IsNil() {
+			return nil
+		}
+		val = val.Elem()
+	}
+
+	if val.Kind() != reflect.Struct {
+		return nil
+	}
+
+	var attrs []any
+	typ := val.Type()
+
+	for i := 0; i < val.NumField(); i++ {
+		fieldVal := val.Field(i)
+		fieldTyp := typ.Field(i)
+
+		// Skip unexported fields
+		if fieldTyp.PkgPath != "" && !fieldTyp.Anonymous {
+			continue
+		}
+
+		// Handle embedded structs recursively (e.g., LogFields, UserInfo)
+		if fieldTyp.Anonymous && fieldVal.Kind() == reflect.Struct {
+			attrs = append(attrs, StructToAttrs(fieldVal.Interface())...)
+			continue
+		}
+
+		// Extract key from JSON tag, fallback to field name
+		tag := fieldTyp.Tag.Get("json")
+		key := strings.Split(tag, ",")[0]
+		if key == "" || key == "-" {
+			key = fieldTyp.Name
+		}
+
+		// Skip empty omitempty fields
+		if strings.Contains(tag, "omitempty") && fieldVal.IsZero() {
+			continue
+		}
+
+		// Map primitive and specialized types to correct slog typed Attrs
+		switch v := fieldVal.Interface().(type) {
+		case string:
+			if v != "" {
+				attrs = append(attrs, slog.String(key, v))
+			}
+		case int:
+			attrs = append(attrs, slog.Int(key, v))
+		case int64:
+			attrs = append(attrs, slog.Int64(key, v))
+		case float64:
+			attrs = append(attrs, slog.Float64(key, v))
+		case bool:
+			attrs = append(attrs, slog.Bool(key, v))
+		case time.Duration:
+			attrs = append(attrs, slog.Duration(key, v))
+		case LogType:
+			attrs = append(attrs, slog.String(key, string(v)))
+		default:
+			if !fieldVal.IsZero() {
+				attrs = append(attrs, slog.Any(key, fieldVal.Interface()))
+			}
+		}
+	}
+	return attrs
 }
