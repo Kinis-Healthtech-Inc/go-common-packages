@@ -1,8 +1,8 @@
 package logger
 
-// LogType represents the category of a log entry.
+type LogType string
 
 const (
-	RequestAccessLogType string = "access"
-	ApplicationLogType   string = "application"
+	RequestLogType     LogType = "request_log"
+	ApplicationLogType LogType = "application_log"
 )

@@ -1,4 +1,4 @@
-package sentry
+package logger
 
 import (
 	"time"
@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// hubFromCtx returns the per-request *sentry.Hub attached by the sentryfiber
+// hubFromCtx returns the per-request *logger.Hub attached by the sentryfiber
 // middleware. It returns nil if Sentry is disabled, the middleware did not run
 // for this request (e.g. background jobs), or the ctx is nil.
 func hubFromCtx(c *fiber.Ctx) *sentrygo.Hub {
