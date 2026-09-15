@@ -18,7 +18,7 @@ import (
 type Logger interface {
 	LogRequest(ctx *fiber.Ctx, fields RequestLogFields)
 	LogErrorDeprecated(ctx context.Context, errorContext string, errorMessage string)
-	LogInfoDeprecated(ctx context.Context, infoContext string, errorMessage string)
+	LogInfoDeprecated(ctx context.Context, infoContext string, message string)
 	ServiceName() string
 	Logger() *slog.Logger
 }
@@ -28,7 +28,7 @@ type client struct {
 	logger      *slog.Logger
 }
 
-func Init(lc fx.Lifecycle, config Config) (Logger, error) {
+func Init(lc fx.Lifecycle) (Logger, error) {
 	cfg := loadSentryConfig()
 	if cfg == nil || cfg.DSN == "" || !strings.HasPrefix(cfg.DSN, "https://") {
 		log.Println("logger disabled: DSN is empty or not configured")
@@ -70,7 +70,7 @@ func Init(lc fx.Lifecycle, config Config) (Logger, error) {
 		},
 	})
 	return &client{
-		serviceName: config.ServiceName,
+		serviceName: cfg.ServiceName,
 		logger:      slogLogger,
 	}, nil
 }
