@@ -11,11 +11,14 @@ import (
 
 	sentrygo "github.com/getsentry/sentry-go"
 	sentryslog "github.com/getsentry/sentry-go/slog"
+	"github.com/gofiber/fiber/v2"
 	"go.uber.org/fx"
 )
 
 type Logger interface {
-	LogRequest(fields RequestLogFields)
+	LogRequest(ctx *fiber.Ctx, fields RequestLogFields)
+	LogErrorDeprecated(ctx *fiber.Ctx, errorContext string, errorMessage string)
+	LogInfoDeprecated(ctx *fiber.Ctx, infoContext string, errorMessage string)
 	ServiceName() string
 	Logger() *slog.Logger
 }
@@ -80,7 +83,7 @@ func (c *client) Logger() *slog.Logger {
 	return c.logger
 }
 
-func (c *client) LogRequest(fields RequestLogFields) {
+func (c *client) LogRequest(ctx *fiber.Ctx, fields RequestLogFields) {
 	msg := fmt.Sprintf("HTTP %s %s - %d", fields.Method, fields.Endpoint, fields.StatusCode)
 
 	attrs := []any{
@@ -103,9 +106,15 @@ func (c *client) LogRequest(fields RequestLogFields) {
 
 	if fields.ErrorMessage != "" {
 		attrs = append(attrs, slog.String("error_message", fields.ErrorMessage))
-		c.logger.Error(msg, attrs...)
+		c.logger.ErrorContext(ctx.Context(), msg, attrs...)
 		return
 	}
 
-	c.logger.Info(msg, attrs...)
+	c.logger.InfoContext(ctx.Context(), msg, attrs...)
+}
+func (c *client) LogErrorDeprecated(ctx *fiber.Ctx, errorContext string, errorMessage string) {
+	c.logger.With(LogFields{Context: errorContext}).ErrorContext(ctx.Context(), errorMessage)
+}
+func (c *client) LogInfoDeprecated(ctx *fiber.Ctx, infoContext string, message string) {
+	c.logger.With(LogFields{Context: infoContext}).InfoContext(ctx.Context(), message)
 }
