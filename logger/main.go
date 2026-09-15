@@ -122,6 +122,7 @@ func (c *client) LogRequest(ctx *fiber.Ctx, fields RequestLogFields) {
 
 	c.logger.InfoContext(ctx.Context(), msg, attrs...)
 }
+
 func (c *client) LogErrorDeprecated(ctx *fiber.Ctx, errorContext string, errorMessage string) {
 	logInfo := c.Logger(ctx).
 		With(slog.String("context", errorContext)).
@@ -133,7 +134,7 @@ func (c *client) LogErrorDeprecated(ctx *fiber.Ctx, errorContext string, errorMe
 	}
 }
 func (c *client) LogInfoDeprecated(ctx *fiber.Ctx, infoContext string, message string) {
-	logInfo := c.logger.With(slog.String("context", infoContext)).With(slog.String("log_type", string(LogType(ApplicationLogType))))
+	logInfo := c.Logger(ctx).With(slog.String("context", infoContext)).With(slog.String("log_type", string(LogType(ApplicationLogType))))
 	if ctx == nil {
 		logInfo.Info(message)
 	} else {
