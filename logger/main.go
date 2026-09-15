@@ -7,6 +7,7 @@ import (
 	"log"
 	"log/slog"
 	"os"
+	"runtime"
 	"strings"
 	"time"
 
@@ -124,9 +125,17 @@ func (c *client) LogRequest(ctx *fiber.Ctx, fields RequestLogFields) {
 }
 
 func (c *client) LogErrorDeprecated(ctx *fiber.Ctx, errorContext string, errorMessage string) {
+	_, file, line, ok := runtime.Caller(1)
 	logInfo := c.Logger(ctx).
 		With(slog.String("context", errorContext)).
 		With(slog.String("log_type", string(LogType(ApplicationLogType))))
+
+	if ok {
+		logInfo = logInfo.With(
+			slog.String("custom_source_file", file),
+			slog.Int("custom_source_line", line),
+		)
+	}
 	if ctx == nil {
 		logInfo.Error(errorMessage)
 	} else {
@@ -134,7 +143,15 @@ func (c *client) LogErrorDeprecated(ctx *fiber.Ctx, errorContext string, errorMe
 	}
 }
 func (c *client) LogInfoDeprecated(ctx *fiber.Ctx, infoContext string, message string) {
+	_, file, line, ok := runtime.Caller(1)
+
 	logInfo := c.Logger(ctx).With(slog.String("context", infoContext)).With(slog.String("log_type", string(LogType(ApplicationLogType))))
+	if ok {
+		logInfo = logInfo.With(
+			slog.String("custom_source_file", file),
+			slog.Int("custom_source_line", line),
+		)
+	}
 	if ctx == nil {
 		logInfo.Info(message)
 	} else {

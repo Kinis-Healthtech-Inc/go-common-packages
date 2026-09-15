@@ -37,6 +37,8 @@ type RequestLogFields struct {
 type ApplicationLogFields struct {
 	UserInfo
 	LogFields
-	ErrorType    string `json:"error_type,omitempty"`
-	ErrorMessage string `json:"error_message,omitempty"`
+	ErrorType        string `json:"error_type,omitempty"`
+	ErrorMessage     string `json:"error_message,omitempty"`
+	CustomSourceFile string `json:"custom_source_file,omitempty"`
+	CustomSourceLine string `json:"custom_source_line,omitempty"`
 }
