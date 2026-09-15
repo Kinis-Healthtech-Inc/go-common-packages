@@ -18,10 +18,10 @@ import (
 
 type Logger interface {
 	LogRequest(ctx *fiber.Ctx, fields RequestLogFields)
-	LogErrorDeprecated(ctx context.Context, errorContext string, errorMessage string)
-	LogInfoDeprecated(ctx context.Context, infoContext string, message string)
+	LogErrorDeprecated(ctx *fiber.Ctx, errorContext string, errorMessage string)
+	LogInfoDeprecated(ctx *fiber.Ctx, infoContext string, infoMessage string)
 	ServiceName() string
-	Logger() *slog.Logger
+	Logger(ctx *fiber.Ctx) *slog.Logger
 }
 
 type client struct {
@@ -66,8 +66,7 @@ func Init(lc fx.Lifecycle) (Logger, error) {
 		AddSource: true,
 	}.NewSentryHandler(ctx)
 	multiHandler := slog.NewMultiHandler(sentryHandler, consoleHandler)
-	contextHandler := &ContextHandler{Handler: multiHandler}
-	slogLogger := slog.New(contextHandler)
+	slogLogger := slog.New(multiHandler)
 
 	lc.Append(fx.Hook{
 		OnStop: func(ctx context.Context) error {
@@ -85,7 +84,12 @@ func (c *client) ServiceName() string {
 	return c.serviceName
 }
 
-func (c *client) Logger() *slog.Logger {
+func (c *client) Logger(ctx *fiber.Ctx) *slog.Logger {
+	if ctx != nil {
+		if reqLog, ok := ctx.Locals("request_logger").(*slog.Logger); ok {
+			return reqLog
+		}
+	}
 	return c.logger
 }
 
@@ -118,12 +122,21 @@ func (c *client) LogRequest(ctx *fiber.Ctx, fields RequestLogFields) {
 
 	c.logger.InfoContext(ctx.Context(), msg, attrs...)
 }
-func (c *client) LogErrorDeprecated(ctx context.Context, errorContext string, errorMessage string) {
-	c.logger.
+func (c *client) LogErrorDeprecated(ctx *fiber.Ctx, errorContext string, errorMessage string) {
+	logInfo := c.Logger(ctx).
 		With(slog.String("context", errorContext)).
-		With(slog.String("log_type", string(LogType(ApplicationLogType)))).
-		ErrorContext(ctx, errorMessage)
+		With(slog.String("log_type", string(LogType(ApplicationLogType))))
+	if ctx == nil {
+		logInfo.Error(errorMessage)
+	} else {
+		logInfo.ErrorContext(ctx.Context(), errorMessage)
+	}
 }
-func (c *client) LogInfoDeprecated(ctx context.Context, infoContext string, message string) {
-	c.logger.With(slog.String("context", infoContext)).With(slog.String("log_type", string(LogType(ApplicationLogType)))).InfoContext(ctx, message)
+func (c *client) LogInfoDeprecated(ctx *fiber.Ctx, infoContext string, message string) {
+	logInfo := c.logger.With(slog.String("context", infoContext)).With(slog.String("log_type", string(LogType(ApplicationLogType))))
+	if ctx == nil {
+		logInfo.Info(message)
+	} else {
+		logInfo.InfoContext(ctx.Context(), message)
+	}
 }

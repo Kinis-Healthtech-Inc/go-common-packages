@@ -2,6 +2,8 @@ package logger
 
 import "time"
 
+const UserContextKey = "slog_user_info"
+
 type UserInfo struct {
 	UserID           string
 	Role             string
