@@ -17,8 +17,8 @@ import (
 
 type Logger interface {
 	LogRequest(ctx *fiber.Ctx, fields RequestLogFields)
-	LogErrorDeprecated(ctx *fiber.Ctx, errorContext string, errorMessage string)
-	LogInfoDeprecated(ctx *fiber.Ctx, infoContext string, errorMessage string)
+	LogErrorDeprecated(ctx context.Context, errorContext string, errorMessage string)
+	LogInfoDeprecated(ctx context.Context, infoContext string, errorMessage string)
 	ServiceName() string
 	Logger() *slog.Logger
 }
@@ -112,9 +112,9 @@ func (c *client) LogRequest(ctx *fiber.Ctx, fields RequestLogFields) {
 
 	c.logger.InfoContext(ctx.Context(), msg, attrs...)
 }
-func (c *client) LogErrorDeprecated(ctx *fiber.Ctx, errorContext string, errorMessage string) {
-	c.logger.With(LogFields{Context: errorContext}).ErrorContext(ctx.Context(), errorMessage)
+func (c *client) LogErrorDeprecated(ctx context.Context, errorContext string, errorMessage string) {
+	c.logger.With(LogFields{Context: errorContext}).ErrorContext(ctx, errorMessage)
 }
-func (c *client) LogInfoDeprecated(ctx *fiber.Ctx, infoContext string, message string) {
-	c.logger.With(LogFields{Context: infoContext}).InfoContext(ctx.Context(), message)
+func (c *client) LogInfoDeprecated(ctx context.Context, infoContext string, message string) {
+	c.logger.With(LogFields{Context: infoContext}).InfoContext(ctx, message)
 }
