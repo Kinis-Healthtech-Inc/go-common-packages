@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
+	"os"
 	"strings"
 	"time"
 
@@ -56,13 +57,17 @@ func Init(lc fx.Lifecycle) (Logger, error) {
 	}
 
 	ctx := context.Background()
-	// Create the Sentry slog handler
+
+	consoleHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelInfo, // Set minimum level for console printing
+	})
 	sentryHandler := sentryslog.Option{
 		LogLevel:  []slog.Level{slog.LevelInfo, slog.LevelWarn, slog.LevelError},
 		AddSource: true,
 	}.NewSentryHandler(ctx)
-	log.Printf("logger initialized (env=%s, release=%s)", cfg.Environment, cfg.Release)
-	slogLogger := slog.New(sentryHandler)
+	multiHandler := slog.NewMultiHandler(sentryHandler, consoleHandler)
+	slogLogger := slog.New(multiHandler)
+
 	lc.Append(fx.Hook{
 		OnStop: func(ctx context.Context) error {
 			sentrygo.Flush(2 * time.Second)
