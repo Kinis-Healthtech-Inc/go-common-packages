@@ -5,10 +5,10 @@ import "time"
 const UserContextKey = "slog_user_info"
 
 type UserInfo struct {
-	UserID           string
-	Role             string
-	OrganizationID   string
-	OrganizationName string
+	UserID           string `json:"user_id,omitempty"`
+	Role             string `json:"role,omitempty"`
+	OrganizationID   string `json:"organization_id,omitempty"`
+	OrganizationName string `json:"organization_name,omitempty"`
 }
 
 type LogFields struct {
