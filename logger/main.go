@@ -16,8 +16,8 @@ import (
 
 type Logger interface {
 	LogRequest(fields RequestLogFields)
-	LogError(fields ApplicationLogFields)
-	LogInfo(fields ApplicationLogFields)
+	ServiceName() string
+	Logger() *slog.Logger
 }
 
 type client struct {
@@ -31,7 +31,6 @@ func Init(lc fx.Lifecycle, config Config) (Logger, error) {
 		log.Println("logger disabled: DSN is empty or not configured")
 		return nil, errors.New("logger disabled: DSN is empty or not configured")
 	}
-
 	opts := sentrygo.ClientOptions{
 		Dsn:              cfg.DSN,
 		Environment:      cfg.Environment,
@@ -73,6 +72,14 @@ func Init(lc fx.Lifecycle, config Config) (Logger, error) {
 	}, nil
 }
 
+func (c *client) ServiceName() string {
+	return c.serviceName
+}
+
+func (c *client) Logger() *slog.Logger {
+	return c.logger
+}
+
 func (c *client) LogRequest(fields RequestLogFields) {
 	msg := fmt.Sprintf("HTTP %s %s - %d", fields.Method, fields.Endpoint, fields.StatusCode)
 
@@ -101,38 +108,4 @@ func (c *client) LogRequest(fields RequestLogFields) {
 	}
 
 	c.logger.Info(msg, attrs...)
-}
-
-func (c *client) LogInfo(fields ApplicationLogFields) {
-	msg := fields.Event
-
-	attrs := []any{
-		slog.String("context", fields.Context),
-		slog.String("event", fields.Event),
-		slog.String("type", string(LogType(ApplicationLogType))),
-		slog.String("service_name", c.serviceName),
-		slog.String("user_id", fields.UserID),
-		slog.String("role", fields.Role),
-		slog.String("organization_id", fields.OrganizationID),
-		slog.String("organization_name", fields.OrganizationName),
-	}
-	c.logger.Info(msg, attrs...)
-}
-
-func (c *client) LogError(fields ApplicationLogFields) {
-	msg := fields.Event
-
-	attrs := []any{
-		slog.String("context", fields.Context),
-		slog.String("event", fields.Event),
-		slog.String("type", string(LogType(ApplicationLogType))),
-		slog.String("service_name", c.serviceName),
-		slog.String("user_id", fields.UserID),
-		slog.String("role", fields.Role),
-		slog.String("organization_id", fields.OrganizationID),
-		slog.String("organization_name", fields.OrganizationName),
-		slog.String("error_type", fields.ErrorType),
-		slog.String("error_message", fields.ErrorMessage),
-	}
-	c.logger.Error(msg, attrs...)
 }
