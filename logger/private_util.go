@@ -104,6 +104,7 @@ func beforeSend(event *sentrygo.Event, _ *sentrygo.EventHint) *sentrygo.Event {
 	return event
 }
 
+// StructToAttrs converts any struct into a flat slice of alternating key-value pairs ([]any) using its json tags.
 func StructToAttrs(v any) []any {
 	val := reflect.ValueOf(v)
 	if val.Kind() == reflect.Ptr {
@@ -117,7 +118,7 @@ func StructToAttrs(v any) []any {
 		fieldVal := val.Field(i)
 		structField := typ.Field(i)
 
-		// Handle embedded structs (like LogFields) recursively
+		// Handle embedded structs recursively
 		if structField.Anonymous {
 			if fieldVal.Kind() == reflect.Struct {
 				attrs = append(attrs, StructToAttrs(fieldVal.Interface())...)
@@ -130,18 +131,18 @@ func StructToAttrs(v any) []any {
 			continue
 		}
 
-		// Extract key name from json tag (e.g., "user_id,omitempty" -> "user_id")
 		name := tag
 		if idx := strings.Index(tag, ","); idx != -1 {
 			name = tag[:idx]
 		}
 
-		// Skip zero values if "omitempty" is specified in the tag
+		// Skip zero values if "omitempty" is specified
 		if fieldVal.IsZero() && strings.Contains(tag, "omitempty") {
 			continue
 		}
 
-		attrs = append(attrs, slog.Any(name, fieldVal.Interface()))
+		// Append BOTH the key (string) and the value as separate elements
+		attrs = append(attrs, name, fieldVal.Interface())
 	}
 
 	return attrs
