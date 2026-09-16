@@ -99,8 +99,8 @@ func (c *client) Logger(ctx *fiber.Ctx) *slog.Logger {
 		}
 	}
 
-	// Automatically attach file and line source attributes if available
-	if fileSourceAttrs := FileSourceAttributes(2); fileSourceAttrs != nil {
+	// Automatically capture file and line of the handler calling Logger(ctx)
+	if fileSourceAttrs := FileSourceAttributes(3); fileSourceAttrs != nil {
 		logger = logger.With(fileSourceAttrs...)
 	}
 
