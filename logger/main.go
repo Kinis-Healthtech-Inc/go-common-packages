@@ -88,33 +88,19 @@ func (c *client) Logger(ctx *fiber.Ctx) *slog.Logger {
 	if ctx == nil {
 		return c.logger
 	}
-	logger := c.logger
 
 	if reqLog, ok := ctx.Locals("request_logger").(*slog.Logger); ok {
-		logger = reqLog
+		return reqLog
 	}
 
+	logger := c.logger
 	reqID := ctx.Get("X-Request-ID")
 	if reqID != "" {
-		// Assign the returned logger back to the variable because .With() is immutable
 		logger = logger.With(slog.String(LogKeyRequestID, reqID))
 	}
 
 	return logger
 }
-
-//	func (c *client) Logger(ctx *fiber.Ctx) *slog.Logger {
-//		reqID := ctx.Get("X-Request-ID")
-//		if reqID != "" {
-//			return c.logger.With(slog.String(LogKeyRequestID, reqID))
-//		}
-//		if ctx != nil {
-//			if reqLog, ok := ctx.Locals("request_logger").(*slog.Logger); ok {
-//				return reqLog
-//			}
-//		}
-//		return c.logger
-//	}
 func (c *client) LogRequest(ctx *fiber.Ctx, fields RequestLogFields) {
 	msg := fmt.Sprintf("HTTP %s %s - %d", fields.Method, fields.Endpoint, fields.StatusCode)
 
