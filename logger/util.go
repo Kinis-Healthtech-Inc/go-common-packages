@@ -8,7 +8,7 @@ import (
 
 func GetCallStack(depth int) slog.Attr {
 	var frames []any
-	skip := 3 // adjust based on your call stack depth
+	skip := 2 // adjust based on your call stack depth
 
 	for i := 0; i < depth; i++ {
 		if _, file, line, ok := runtime.Caller(skip); ok {
