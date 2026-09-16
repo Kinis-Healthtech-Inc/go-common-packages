@@ -1,26 +1,18 @@
 package logger
 
 import (
-	"fmt"
 	"log/slog"
 	"runtime"
 )
 
-func GetCallStack(depth int) slog.Attr {
-	var frames []any
-	skip := 2 // adjust based on your call stack depth
-
-	for i := 0; i < depth; i++ {
-		if _, file, line, ok := runtime.Caller(skip); ok {
-			frames = append(frames, slog.Group(fmt.Sprintf("frame_%d", i),
-				slog.String(LogKeySourceFile, file),
-				slog.Int(LogKeySourceLine, line),
-			))
-			skip++
-		} else {
-			break
-		}
+// Here captures the exact file and line of the code line it is invoked on.
+func Here() slog.Attr {
+	_, file, line, ok := runtime.Caller(1)
+	if !ok {
+		return slog.Group("source", slog.String("file", "unknown"))
 	}
-
-	return slog.Group("call_stack", frames...)
+	return slog.Group("source",
+		slog.String(LogKeySourceFile, file),
+		slog.Int(LogKeySourceLine, line),
+	)
 }
