@@ -94,11 +94,11 @@ func (c *client) Logger(ctx *fiber.Ctx) *slog.Logger {
 		logger = reqLog
 	}
 
-	reqID := ctx.Get("X-Request-ID")
-	if reqID != "" {
-		// Assign the returned logger back to the variable because .With() is immutable
-		logger = logger.With(slog.String(LogKeyRequestID, reqID))
-	}
+	//reqID := ctx.Get("X-Request-ID")
+	//if reqID != "" {
+	//	// Assign the returned logger back to the variable because .With() is immutable
+	//	logger = logger.With(slog.String(LogKeyRequestID, reqID))
+	//}
 
 	return logger
 }
