@@ -2,18 +2,29 @@ package logger
 
 import "time"
 
+// Example of How to use
+//handler.logger.Logger(ctx).
+//	With(logger.LogKeyContext, "patient calls GetUserAssessmentSessionByID").
+//	With(logger.LogKeyErrorType, "database error").
+//	With(logger.LogKeyEvent, "assessment_session.get").
+//	With(logger.LogKeyErrorMessage, "error getting assessment session: "+err.Error()).
+//	InfoContext(ctx.Context(), "Failed to get assessment session")
+
 const (
-	// --- UserInfo Keys ---
+	// --- Service Keys --- Almost all services will have these keys
+	LogKeyLogType     = "log_type"
+	LogKeyServiceName = "service_name"
+	// --- UserInfo Keys --- Almost all services will have these keys
 	LogKeyUserID           = "user_id"
 	LogKeyRole             = "role"
 	LogKeyOrganizationID   = "organization_id"
 	LogKeyOrganizationName = "organization_name"
 
 	// --- LogFields Keys ---
-	LogKeyContext     = "context"
-	LogKeyEvent       = "event"
-	LogKeyLogType     = "log_type"
-	LogKeyServiceName = "service_name"
+	LogKeyContext      = "context"       // explain what the log is for, e.g. "patient calls GetUserAssessmentSessionByID"
+	LogKeyEvent        = "event"         // explain what the log is about, <some_entity>.<action> e.g. "assessment_session.get"
+	LogKeyErrorType    = "error_type"    // e.g. "database error", "validation error", "third party api error"
+	LogKeyErrorMessage = "error_message" // says what the error is, e.g. "error getting assessment session: invalid id"
 
 	// --- RequestLogFields Unique Keys ---
 	LogKeyTimestamp   = "timestamp"
@@ -28,10 +39,8 @@ const (
 	LogKeyLatency     = "latency"
 
 	// --- ApplicationLogFields / Shared Keys ---
-	LogKeyErrorType    = "error_type"
-	LogKeyErrorMessage = "error_message"
-	LogKeySourceFile   = "custom_source_file"
-	LogKeySourceLine   = "custom_source_line"
+	LogKeySourceFile = "custom_source_file"
+	LogKeySourceLine = "custom_source_line"
 )
 
 type LogFields struct {
