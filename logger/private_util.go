@@ -103,8 +103,6 @@ func beforeSend(event *sentrygo.Event, _ *sentrygo.EventHint) *sentrygo.Event {
 
 	return event
 }
-
-// StructToAttrs converts any struct into a flat slice of alternating key-value pairs ([]any) using its json tags.
 func StructToAttrs(v any) []any {
 	val := reflect.ValueOf(v)
 	if val.Kind() == reflect.Ptr {
@@ -141,8 +139,8 @@ func StructToAttrs(v any) []any {
 			continue
 		}
 
-		// Append BOTH the key (string) and the value as separate elements
-		attrs = append(attrs, name, fieldVal.Interface())
+		// Create a proper slog.Attr for each field
+		attrs = append(attrs, slog.Any(name, fieldVal.Interface()))
 	}
 
 	return attrs
