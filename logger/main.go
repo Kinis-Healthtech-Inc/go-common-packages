@@ -85,28 +85,27 @@ func (c *client) ServiceName() string {
 }
 
 func (c *client) Logger(ctx *fiber.Ctx) *slog.Logger {
+	var logger *slog.Logger
+
 	if ctx == nil {
-		return c.logger
+		logger = c.logger
+	} else if reqLog, ok := ctx.Locals("request_logger").(*slog.Logger); ok {
+		logger = reqLog
+	} else {
+		logger = c.logger
+		reqID := ctx.Get("X-Request-ID")
+		if reqID != "" {
+			logger = logger.With(slog.String(LogKeyRequestID, reqID))
+		}
 	}
-
-	if reqLog, ok := ctx.Locals("request_logger").(*slog.Logger); ok {
-		return reqLog
-	}
-
-	logger := c.logger
-	reqID := ctx.Get("X-Request-ID")
-	if reqID != "" {
-		logger = logger.With(slog.String(LogKeyRequestID, reqID))
-	}
-
 	return logger
 }
+
 func (c *client) LogRequest(ctx *fiber.Ctx, fields RequestLogFields) {
 	msg := fmt.Sprintf("HTTP %s %s - %d", fields.Method, fields.Endpoint, fields.StatusCode)
 
 	// Automatically maps struct fields & JSON tags to slog attributes
 	attrs := StructToAttrs(fields)
-
 	if fields.ErrorMessage != "" {
 		c.logger.ErrorContext(ctx.Context(), msg, attrs...)
 		return
