@@ -85,6 +85,10 @@ func (c *client) ServiceName() string {
 }
 
 func (c *client) Logger(ctx *fiber.Ctx) *slog.Logger {
+	reqID := ctx.Get("X-Request-ID")
+	if reqID != "" {
+		return c.logger.With(slog.String(LogKeyRequestID, reqID))
+	}
 	if ctx != nil {
 		if reqLog, ok := ctx.Locals("request_logger").(*slog.Logger); ok {
 			return reqLog
