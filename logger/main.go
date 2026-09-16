@@ -98,14 +98,9 @@ func (c *client) Logger(ctx *fiber.Ctx) *slog.Logger {
 			logger = logger.With(slog.String(LogKeyRequestID, reqID))
 		}
 	}
-
-	// Automatically capture file and line of the handler calling Logger(ctx)
-	if fileSourceAttrs := FileSourceAttributes(3); fileSourceAttrs != nil {
-		logger = logger.With(fileSourceAttrs...)
-	}
-
 	return logger
 }
+
 func (c *client) LogRequest(ctx *fiber.Ctx, fields RequestLogFields) {
 	msg := fmt.Sprintf("HTTP %s %s - %d", fields.Method, fields.Endpoint, fields.StatusCode)
 
