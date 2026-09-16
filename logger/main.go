@@ -7,7 +7,6 @@ import (
 	"log"
 	"log/slog"
 	"os"
-	"runtime"
 	"strings"
 	"time"
 
@@ -71,7 +70,7 @@ func Init(lc fx.Lifecycle) (Logger, error) {
 
 	lc.Append(fx.Hook{
 		OnStop: func(ctx context.Context) error {
-			sentrygo.Flush(2 * time.Second)
+			sentrygo.Flush(3 * time.Second)
 			return nil
 		},
 	})
@@ -93,30 +92,13 @@ func (c *client) Logger(ctx *fiber.Ctx) *slog.Logger {
 	}
 	return c.logger
 }
-
 func (c *client) LogRequest(ctx *fiber.Ctx, fields RequestLogFields) {
 	msg := fmt.Sprintf("HTTP %s %s - %d", fields.Method, fields.Endpoint, fields.StatusCode)
+
+	// Automatically maps struct fields & JSON tags to slog attributes
 	attrs := StructToAttrs(fields)
-	//attrs := []any{
-	//	slog.String("context", fields.Context),
-	//	slog.String("event", fields.Event),
-	//	slog.String("type", string(LogType(RequestLogType))),
-	//	slog.String("service_name", c.serviceName),
-	//	slog.String("timestamp", fields.Timestamp),
-	//	slog.String("endpoint", fields.Endpoint),
-	//	slog.String("method", fields.Method),
-	//	slog.Int("status_code", fields.StatusCode),
-	//	slog.String("request_id", fields.RequestID),
-	//	slog.String("url", fields.URL),
-	//	slog.String("client_ip", fields.ClientIP),
-	//	slog.String("user_agent", fields.UserAgent),
-	//	slog.String("user_id", fields.UserID),
-	//	slog.String("organization_id", fields.OrganizationID),
-	//	slog.Duration("latency", fields.Latency),
-	//}
 
 	if fields.ErrorMessage != "" {
-		attrs = append(attrs, slog.String("error_message", fields.ErrorMessage))
 		c.logger.ErrorContext(ctx.Context(), msg, attrs...)
 		return
 	}
@@ -125,33 +107,30 @@ func (c *client) LogRequest(ctx *fiber.Ctx, fields RequestLogFields) {
 }
 
 func (c *client) LogErrorDeprecated(ctx *fiber.Ctx, errorContext string, errorMessage string) {
-	_, file, line, ok := runtime.Caller(1)
 	logInfo := c.Logger(ctx).
-		With(slog.String("context", errorContext)).
-		With(slog.String("log_type", string(LogType(ApplicationLogType))))
+		With(slog.String(LogKeyContext, errorContext)).
+		With(slog.String(LogKeyLogType, string(LogType(ApplicationLogType))))
 
-	if ok {
-		logInfo = logInfo.With(
-			slog.String("custom_source_file", file),
-			slog.Int("custom_source_line", line),
-		)
+	if attrs := FileSourceAttributes(2); attrs != nil {
+		logInfo = logInfo.With(attrs...)
 	}
+
 	if ctx == nil {
 		logInfo.Error(errorMessage)
 	} else {
 		logInfo.ErrorContext(ctx.Context(), errorMessage)
 	}
 }
-func (c *client) LogInfoDeprecated(ctx *fiber.Ctx, infoContext string, message string) {
-	_, file, line, ok := runtime.Caller(1)
 
-	logInfo := c.Logger(ctx).With(slog.String("context", infoContext)).With(slog.String("log_type", string(LogType(ApplicationLogType))))
-	if ok {
-		logInfo = logInfo.With(
-			slog.String("custom_source_file", file),
-			slog.Int("custom_source_line", line),
-		)
+func (c *client) LogInfoDeprecated(ctx *fiber.Ctx, infoContext string, message string) {
+	logInfo := c.Logger(ctx).
+		With(slog.String(LogKeyContext, infoContext)).
+		With(slog.String(LogKeyLogType, string(LogType(ApplicationLogType))))
+
+	if attrs := FileSourceAttributes(2); attrs != nil {
+		logInfo = logInfo.With(attrs...)
 	}
+
 	if ctx == nil {
 		logInfo.Info(message)
 	} else {
