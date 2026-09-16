@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 	"reflect"
@@ -145,12 +146,21 @@ func StructToAttrs(v any) []any {
 
 	return attrs
 }
-func FileSourceAttributes(skip int) []any {
-	if _, file, line, ok := runtime.Caller(skip); ok {
-		return []any{
-			slog.String(LogKeySourceFile, file),
-			slog.Int(LogKeySourceLine, line),
+func FileSourceAttributes(depth int) []any {
+	var attrs []any
+	skip := 2
+
+	for i := 0; i < depth; i++ {
+		if _, file, line, ok := runtime.Caller(skip); ok {
+			// Adds distinct keys or can format into an array depending on preference
+			attrs = append(attrs,
+				slog.String(fmt.Sprintf("source_file_%d", i), file),
+				slog.Int(fmt.Sprintf("source_line_%d", i), line),
+			)
+			skip++
+		} else {
+			break
 		}
 	}
-	return nil
+	return attrs
 }
