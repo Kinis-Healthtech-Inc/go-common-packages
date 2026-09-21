@@ -25,7 +25,7 @@ const (
 	LogKeyEvent        = "event"         // explain what the log is about, <some_entity>.<action> e.g. "assessment_session.get"
 	LogKeyErrorType    = "error_type"    // e.g. "database error", "validation error", "third party api error"
 	LogKeyErrorMessage = "error_message" // says what the error is, e.g. "error getting assessment session: invalid id"
-
+	LogKeyStatus       = "status"        // "success" or "failure"
 	// --- RequestLogFields Unique Keys ---
 	LogKeyTimestamp   = "timestamp"
 	LogKeyEndpoint    = "endpoint"
