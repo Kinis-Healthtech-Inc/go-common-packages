@@ -2,7 +2,7 @@ package logger
 
 import "time"
 
-// Example of How to use
+// Example of How to use this
 //handler.logger.Logger(ctx).
 //	With(logger.LogKeyContext, "patient calls GetUserAssessmentSessionByID").
 //	With(logger.LogKeyErrorType, "database error").
