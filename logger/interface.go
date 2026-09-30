@@ -1,7 +1,5 @@
 package logger
 
-import "time"
-
 // Example of How to use
 //handler.logger.Logger(ctx).
 //	With(logger.LogKeyContext, "patient calls GetUserAssessmentSessionByID").
@@ -52,17 +50,17 @@ type LogFields struct {
 
 type RequestLogFields struct {
 	LogFields
-	Timestamp      string        `json:"timestamp"`
-	Endpoint       string        `json:"endpoint"`
-	Method         string        `json:"method"`
-	StatusCode     int           `json:"status_code"`
-	QueryParams    any           `json:"query_params,omitempty"`
-	RequestID      string        `json:"request_id,omitempty"`
-	URL            string        `json:"url"`
-	ClientIP       string        `json:"client_ip,omitempty"`
-	UserAgent      string        `json:"user_agent,omitempty"`
-	UserID         string        `json:"user_id,omitempty"`
-	OrganizationID string        `json:"organization_id,omitempty"`
-	Latency        time.Duration `json:"latency"`
-	ErrorMessage   string        `json:"error_message,omitempty"`
+	Timestamp      string `json:"timestamp"`
+	Endpoint       string `json:"endpoint"`
+	Method         string `json:"method"`
+	StatusCode     int    `json:"status_code"`
+	QueryParams    any    `json:"query_params,omitempty"`
+	RequestID      string `json:"request_id,omitempty"`
+	URL            string `json:"url"`
+	ClientIP       string `json:"client_ip,omitempty"`
+	UserAgent      string `json:"user_agent,omitempty"`
+	UserID         string `json:"user_id,omitempty"`
+	OrganizationID string `json:"organization_id,omitempty"`
+	Latency        string `json:"latency"`
+	ErrorMessage   string `json:"error_message,omitempty"`
 }
